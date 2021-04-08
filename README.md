@@ -13,4 +13,3 @@ Place plugin in BepInEx\plugins directory
 - GridHeight = 10
 - GridWidth = 10
 
-
