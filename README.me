@@ -1,6 +1,14 @@
 # Build Expansion
 
-Expands Hammer build table to desired height and width.
+Expands Hammer build table to desired height and width and adds a scrollbar.
+
+Main purpose is to allow for mod developers to add pieces to build without worrying about exceeding limits.
+
+## This mod does NOT include extra building pieces, it expands the build menu so that other mods can add them. 
+
+## Known conflicts
+
+PlantingPlus modifies certain aspects that make the grid alignment break. This mod is currently not compatible with BuildExpansion.
 
 ## Install
 
@@ -8,10 +16,14 @@ Place plugin in BepInEx\plugins directory
 
 ## Default mod values:
 
-- Enabled = True
-- DisableScrollCategories = True
-- GridHeight = 10
-- GridWidth = 10
+- Enabled : True
+	- Whether the mod is enabled or not
+- DisableScrollCategories : True
+	- Disables the mouse scroll in Hammer build menu so that scrollbar can be used with mouse wheel.
+- GridHeight : 10
+	- New height of grid
+- GridWidth : 10
+	- New width of grid
 
 ## Git
 

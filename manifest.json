@@ -1,6 +1,6 @@
 {
     "name": "BuildExpansion",
-    "version_number": "1.0.0",
+    "version_number": "1.0.2",
     "website_url": "https://github.com/valheimPlus/BuildExpansion",
     "description": "Allows to expand the Hammer build tables to support mods that add new pieces.",
     "dependencies": [

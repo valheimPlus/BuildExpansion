@@ -27,10 +27,10 @@ namespace VPlusBuildExpansion
         public void Awake()
         {
             // Config setup
-            newGridHeight = Config.Bind("General", "GridHeight",  10, "Height in number of rows of the build grid."); 
-            newGridWidth = Config.Bind("General","GridWidth",10,"Width in number of columns of the build grid, maximum value of 10.");
-            disableScrollCategories = Config.Bind("General.Toggles", "DisableScrollCategories", true,"Should the mousewheel stop scrolling categories, RECOMMEND TRUE.");
-            isEnabled = Config.Bind("General.Toggles","EnableExpansion",true,"Whether or not to expand the build grid.");
+            newGridHeight = Config.Bind("General", "GridHeight", 10, "Height in number of rows of the build grid.");
+            newGridWidth = Config.Bind("General", "GridWidth", 10, "Width in number of columns of the build grid, maximum value of 10.");
+            disableScrollCategories = Config.Bind("General.Toggles", "DisableScrollCategories", true, "Should the mousewheel stop scrolling categories, RECOMMEND TRUE.");
+            isEnabled = Config.Bind("General.Toggles", "EnableExpansion", true, "Whether or not to expand the build grid.");
 
             harmony = new Harmony(ID);
             harmony.PatchAll();
@@ -64,7 +64,6 @@ namespace VPlusBuildExpansion
     [HarmonyPatch(typeof(Hud), nameof(Hud.UpdatePieceList))]
     public static class Hud_UpdatePieceList_Transpiler
     {
-        public static bool haveReanchored = false;
         public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
         {
             if (BuildExpansion.isEnabled.Value)
@@ -78,23 +77,7 @@ namespace VPlusBuildExpansion
             return instructions;
         }
 
-        public static void Postfix(ref Hud __instance)
-        {
-            if (BuildExpansion.isEnabled.Value)
-            {
-                if (!haveReanchored)
-                {
-                    foreach (Transform pieceTrans in __instance.m_pieceListRoot.transform)
-                    {
-                        (pieceTrans as RectTransform).anchoredPosition = (pieceTrans as RectTransform).anchoredPosition +
-                            new Vector2(
-                                (-1 * (int)((__instance.m_pieceIconSpacing * BuildExpansion.newGridWidth.Value) / 2)),
-                                ((int)((__instance.m_pieceIconSpacing * BuildExpansion.newGridHeight.Value) / 2))-16);
-                    }
-                    haveReanchored = true;
-                }
-            }
-        }
+
     }
 
     #endregion
@@ -130,11 +113,45 @@ namespace VPlusBuildExpansion
                 testScroll.movementType = ScrollRect.MovementType.Clamped;
                 testScroll.inertia = false;
                 testScroll.scrollSensitivity = __instance.m_pieceIconSpacing;
-                testScroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.Permanent;
-                __instance.m_pieceListRoot.sizeDelta = new Vector2((int)(__instance.m_pieceIconSpacing * BuildExpansion.newGridWidth.Value), (int)(__instance.m_pieceIconSpacing * BuildExpansion.newGridHeight.Value)+16);
+                testScroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+                __instance.m_pieceListRoot.sizeDelta = new Vector2((int)(__instance.m_pieceIconSpacing * BuildExpansion.newGridWidth.Value), (int)(__instance.m_pieceIconSpacing * BuildExpansion.newGridHeight.Value) + 16);
             }
         }
-    }    
+    }
+
+    [HarmonyPatch(typeof(Hud), nameof(Hud.UpdatePieceList))]
+    public static class Hud_UpdatePieceList_Patch
+    {
+        public static bool haveReanchored = false;
+        public static void Postfix(ref Hud __instance)
+        {
+            if (BuildExpansion.isEnabled.Value)
+            {
+                if (!haveReanchored)
+                {
+                    foreach (Transform pieceTrans in __instance.m_pieceListRoot.transform)
+                    {
+                        (pieceTrans as RectTransform).anchoredPosition = (pieceTrans as RectTransform).anchoredPosition +
+                            new Vector2(
+                                (-1 * (int)((__instance.m_pieceIconSpacing * BuildExpansion.newGridWidth.Value) / 2)),
+                                ((int)((__instance.m_pieceIconSpacing * BuildExpansion.newGridHeight.Value) / 2)) - 16);
+                    }
+                    haveReanchored = true;
+                }
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Hud), nameof(Hud.OnDestroy))]
+    public static class Hud_OnDestroy_Patch 
+    { 
+        public static void Postfix(ref Hud __instance) 
+        { 
+            if (BuildExpansion.isEnabled.Value) 
+                if (Hud_UpdatePieceList_Patch.haveReanchored) 
+                    Hud_UpdatePieceList_Patch.haveReanchored = false; 
+        } 
+    }
 
     #endregion
 
