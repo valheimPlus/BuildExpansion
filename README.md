@@ -1,5 +1,7 @@
 # Build Expansion
 
+### Latest update ensures compatability with custom hammers and other PieceTables
+
 Expands Hammer build table to desired height and width and adds a scrollbar.
 
 Main purpose is to allow for mod developers to add pieces to build without worrying about exceeding limits.
@@ -20,10 +22,10 @@ Place plugin in BepInEx\plugins directory
 	- Whether the mod is enabled or not
 - DisableScrollCategories : True
 	- Disables the mouse scroll in Hammer build menu so that scrollbar can be used with mouse wheel.
-- GridHeight : 10
-	- New height of grid
 - GridWidth : 10
 	- New width of grid
+- MaxGridHeight : 15
+	- Sets a maximum value for grid height, if over 30 can impact performance.
 
 ## Git
 
