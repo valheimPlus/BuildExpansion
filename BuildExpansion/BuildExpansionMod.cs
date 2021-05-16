@@ -14,7 +14,7 @@ namespace BuildExpansion
     public class BuildExpansionMod : BaseUnityPlugin
     {
         public const string ID = "mixone.valheimplus.buildexpansion";
-        public const string version = "1.0.6.4";
+        public const string version = "1.0.6.5";
 
         public static ConfigEntry<int> maxGridHeight;
         public static ConfigEntry<int> newGridWidth;
@@ -405,9 +405,10 @@ namespace BuildExpansion
                     {
                         return false;
                     }
+                    int lastRowElems = Hud.instance.m_pieceIcons.Count(x => x.m_go.activeSelf) % HudPatches.calculatedRows;
                     Vector2Int vector2Int = __instance.m_selectedPiece[(int)__instance.m_selectedCategory];
                     vector2Int.x = vector2Int.x + 1;
-                    if (vector2Int.x >= BuildExpansionMod.newGridWidth.Value)
+                    if ((lastRowElems != 0 && vector2Int.x > lastRowElems - 1) || vector2Int.x >= BuildExpansionMod.newGridWidth.Value)
                     {
                         vector2Int.x = 0;
                     }
@@ -430,11 +431,18 @@ namespace BuildExpansion
                     {
                         return false;
                     }
+                    int lastRowElems = Hud.instance.m_pieceIcons.Count(x => x.m_go.activeSelf) % HudPatches.calculatedRows;
                     Vector2Int vector2Int = __instance.m_selectedPiece[(int)__instance.m_selectedCategory];
                     vector2Int.x = vector2Int.x - 1;
                     if (vector2Int.x < 0)
-                    {
-                        vector2Int.x = BuildExpansionMod.newGridWidth.Value - 1;
+                    {                        
+                        if (lastRowElems != 0 && vector2Int.x > lastRowElems - 1)
+                        {
+                            vector2Int.x = lastRowElems - 1;
+                        } else
+                        {
+                            vector2Int.x = BuildExpansionMod.newGridWidth.Value - 1;
+                        }
                     }
                     __instance.m_selectedPiece[(int)__instance.m_selectedCategory] = vector2Int;
                     HudPatches.visibilityInsurance.CenterOnItem(Hud.instance.m_pieceIcons[vector2Int.x + vector2Int.y * BuildExpansionMod.newGridWidth.Value].m_go.transform as RectTransform);
@@ -455,11 +463,16 @@ namespace BuildExpansion
                     {
                         return false;
                     }
+                    int lastRowElems = Hud.instance.m_pieceIcons.Count(x => x.m_go.activeSelf) % HudPatches.calculatedRows;
                     Vector2Int vector2Int = __instance.m_selectedPiece[(int)__instance.m_selectedCategory];
                     vector2Int.y = vector2Int.y - 1;
                     if (vector2Int.y < 0)
                     {
                         vector2Int.y = HudPatches.calculatedRows - 1;
+                        if (lastRowElems != 0 && vector2Int.x > lastRowElems - 1)
+                        {
+                            vector2Int.x = lastRowElems - 1;
+                        }
                     }
                     __instance.m_selectedPiece[(int)__instance.m_selectedCategory] = vector2Int;
                     HudPatches.visibilityInsurance.CenterOnItem(Hud.instance.m_pieceIcons[vector2Int.x + vector2Int.y * BuildExpansionMod.newGridWidth.Value].m_go.transform as RectTransform);
@@ -480,11 +493,16 @@ namespace BuildExpansion
                     {
                         return false;
                     }
+                    int lastRowElems = Hud.instance.m_pieceIcons.Count(x => x.m_go.activeSelf) % HudPatches.calculatedRows;
                     Vector2Int vector2Int = __instance.m_selectedPiece[(int)__instance.m_selectedCategory];
                     vector2Int.y = vector2Int.y + 1;
                     if (vector2Int.y >= HudPatches.calculatedRows)
                     {
                         vector2Int.y = 0;
+                    }
+                    if(lastRowElems != 0 && vector2Int.x > lastRowElems - 1)
+                    {
+                        vector2Int.x = lastRowElems - 1;
                     }
                     __instance.m_selectedPiece[(int)__instance.m_selectedCategory] = vector2Int;
                     HudPatches.visibilityInsurance.CenterOnItem(Hud.instance.m_pieceIcons[vector2Int.x + vector2Int.y * BuildExpansionMod.newGridWidth.Value].m_go.transform as RectTransform);
