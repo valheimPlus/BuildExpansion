@@ -463,7 +463,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BuildExpansion.cs" />
+    <Compile Include="BuildExpansionMod.cs" />
     <Compile Include="PreventClickDragScrollRect.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ScrollRectEnsureVisible.cs" />

@@ -11,10 +11,10 @@ using UnityEngine.UI;
 namespace BuildExpansion
 {
     [BepInPlugin(ID, "Valheim Plus Build Expansion", version)]
-    public class BuildExpansion : BaseUnityPlugin
+    public class BuildExpansionMod : BaseUnityPlugin
     {
         public const string ID = "mixone.valheimplus.buildexpansion";
-        public const string version = "1.0.5.0";
+        public const string version = "1.0.6.3";
 
         public static ConfigEntry<int> maxGridHeight;
         public static ConfigEntry<int> newGridWidth;
@@ -46,15 +46,17 @@ namespace BuildExpansion
     #region Transpilers
 
     #region PieceTable
-
+    /*
     public static class PieceTableTranspilers
     {
+        public static int calculatedRows = 1;
+
         [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.DownPiece))]
         public static class PieceTable_DownPiece_Transpiler
         {
             public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
             {
-                if (BuildExpansion.isEnabled.Value)
+                if (BuildExpansionMod.isEnabled.Value)
                 {
                     var codes = new List<CodeInstruction>(instructions);
                     for(int i = 0; i < codes.Count; i++)
@@ -62,7 +64,7 @@ namespace BuildExpansion
                         if(codes[i].opcode == OpCodes.Ldc_I4_5)
                         {
                             codes[i].opcode = OpCodes.Ldc_I4_S;
-                            codes[i].operand = HudPatches.calculatedRows;
+                            codes[i].operand = calculatedRows;
                         }
                     }
                     return codes;
@@ -76,7 +78,7 @@ namespace BuildExpansion
         {
             public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
             {
-                if (BuildExpansion.isEnabled.Value)
+                if (BuildExpansionMod.isEnabled.Value)
                 {
                     var codes = new List<CodeInstruction>(instructions);
                     for (int i = 0; i < codes.Count; i++)
@@ -84,7 +86,7 @@ namespace BuildExpansion
                         if (codes[i].opcode == OpCodes.Ldc_I4_4)
                         {
                             codes[i].opcode = OpCodes.Ldc_I4_S;
-                            codes[i].operand = HudPatches.calculatedRows - 1;
+                            codes[i].operand = calculatedRows - 1;
                         }
                     }
                     return codes;
@@ -98,14 +100,14 @@ namespace BuildExpansion
         {
             public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
             {
-                if (BuildExpansion.isEnabled.Value)
+                if (BuildExpansionMod.isEnabled.Value)
                 {
                     var codes = new List<CodeInstruction>(instructions);
                     for (int i = 0; i < codes.Count; i++)
                     {
                         if (codes[i].opcode == OpCodes.Ldc_I4_S)
                         {
-                            codes[i].operand = BuildExpansion.newGridWidth.Value;
+                            codes[i].operand = BuildExpansionMod.newGridWidth.Value;
                         }
                     }
                     return codes;
@@ -119,14 +121,14 @@ namespace BuildExpansion
         {
             public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
             {
-                if (BuildExpansion.isEnabled.Value)
+                if (BuildExpansionMod.isEnabled.Value)
                 {
                     var codes = new List<CodeInstruction>(instructions);
                     for (int i = 0; i < codes.Count; i++)
                     {
                         if (codes[i].opcode == OpCodes.Ldc_I4_S)
                         {
-                            codes[i].operand = BuildExpansion.newGridWidth.Value - 1;
+                            codes[i].operand = BuildExpansionMod.newGridWidth.Value - 1;
                         }
                     }
                     return codes;
@@ -140,39 +142,41 @@ namespace BuildExpansion
         {
             public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
             {
-                if (BuildExpansion.isEnabled.Value)
+                if (BuildExpansionMod.isEnabled.Value)
                 {
                     var codes = new List<CodeInstruction>(instructions);
                     for (int i = 0; i < codes.Count; i++)
                     {
                         if (codes[i].opcode == OpCodes.Ldc_I4_S)
                         {
-                            codes[i].operand = BuildExpansion.newGridWidth.Value;
+                            codes[i].operand = BuildExpansionMod.newGridWidth.Value;
                         }
                     }
                     return codes;
                 }
                 return instructions;
             }
-        }
+        }    
     }
+    */
 
     #endregion
 
     #region Hud
-    public static class HudTranspiles
+
+    public static class HudTranspilers
     {
         [HarmonyPatch(typeof(Hud), nameof(Hud.GetSelectedGrid))]
         public static class Hud_GetSelectedGrid_Transpiler
         {
             public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
             {
-                if (BuildExpansion.isEnabled.Value)
+                if (BuildExpansionMod.isEnabled.Value)
                 {
                     var codes = new List<CodeInstruction>(instructions);
-                    codes[0].operand = BuildExpansion.newGridWidth.Value;
+                    codes[0].operand = BuildExpansionMod.newGridWidth.Value;
                     codes[2].opcode = OpCodes.Ldc_I4_S;
-                    codes[2].operand = BuildExpansion.maxGridHeight.Value;
+                    codes[2].operand = BuildExpansionMod.maxGridHeight.Value;
                     return codes;
                 }
                 return instructions;
@@ -184,10 +188,10 @@ namespace BuildExpansion
         {
             public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
             {
-                if (BuildExpansion.isEnabled.Value)
+                if (BuildExpansionMod.isEnabled.Value)
                 {
                     var codes = new List<CodeInstruction>(instructions);
-                    codes[3].operand = BuildExpansion.newGridWidth.Value;
+                    codes[3].operand = BuildExpansionMod.newGridWidth.Value;
                     codes[5].opcode = OpCodes.Ldc_I4_S;
                     codes[5].operand = HudPatches.calculatedRows;
                     return codes;
@@ -215,7 +219,7 @@ namespace BuildExpansion
         {
             public static void Prefix(ref Hud __instance)
             {
-                if (BuildExpansion.isEnabled.Value)
+                if (BuildExpansionMod.isEnabled.Value)
                 {
                     DefaultControls.Resources uiRes = new DefaultControls.Resources();
                     uiRes.standard = __instance.m_pieceCategoryRoot.transform.parent.GetChild(0).gameObject.GetComponent<Image>().sprite;
@@ -237,7 +241,7 @@ namespace BuildExpansion
                     testScroll.scrollSensitivity = __instance.m_pieceIconSpacing;
                     testScroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
                     visibilityInsurance = testScroll.gameObject.AddComponent<ScrollRectEnsureVisible>();
-                    __instance.m_pieceListRoot.sizeDelta = new Vector2((int)(__instance.m_pieceIconSpacing * BuildExpansion.newGridWidth.Value), (int)(__instance.m_pieceIconSpacing * BuildExpansion.maxGridHeight.Value) + 16);
+                    __instance.m_pieceListRoot.sizeDelta = new Vector2((int)(__instance.m_pieceIconSpacing * BuildExpansionMod.newGridWidth.Value), (int)(__instance.m_pieceIconSpacing * BuildExpansionMod.maxGridHeight.Value) + 16);
                 }
             }
         }
@@ -248,10 +252,10 @@ namespace BuildExpansion
             public static bool Prefix(ref Hud __instance, ref Player player, ref Vector2Int selectedNr, 
                                       ref Piece.PieceCategory category, ref bool updateAllBuildStatuses)
             {
-                if (BuildExpansion.isEnabled.Value)
+                if (BuildExpansionMod.isEnabled.Value)
                 {
                     List<Piece> buildPieces = player.GetBuildPieces();                    
-                    int columns = BuildExpansion.newGridWidth.Value;
+                    int columns = BuildExpansionMod.newGridWidth.Value;
                     calculatedRows = (buildPieces.Count / columns) + 1;
                     if (buildPieces.Count <= 1)
                     {
@@ -260,9 +264,9 @@ namespace BuildExpansion
                     }
                     if (__instance.m_pieceIcons.Count(x => x.m_go.activeSelf) != buildPieces.Count)
                     {
-                        BuildExpansion.buildFilterLogger.LogDebug($"\npieceIcons: {__instance.m_pieceIcons.Count(x => x.m_go.activeSelf)}\nBuild pieces: {buildPieces.Count}");
-                        BuildExpansion.buildFilterLogger.LogDebug($"\nRows: {calculatedRows}\nColumns: {columns}");
-                        __instance.m_pieceListRoot.sizeDelta = new Vector2((int)(__instance.m_pieceIconSpacing * BuildExpansion.newGridWidth.Value), (int)(__instance.m_pieceIconSpacing * calculatedRows) + 16);
+                        BuildExpansionMod.buildFilterLogger.LogDebug($"\npieceIcons: {__instance.m_pieceIcons.Count(x => x.m_go.activeSelf)}\nBuild pieces: {buildPieces.Count}");
+                        BuildExpansionMod.buildFilterLogger.LogDebug($"\nRows: {calculatedRows}\nColumns: {columns}");
+                        __instance.m_pieceListRoot.sizeDelta = new Vector2((int)(__instance.m_pieceIconSpacing * BuildExpansionMod.newGridWidth.Value), (int)(__instance.m_pieceIconSpacing * calculatedRows) + 16);
                         foreach (Hud.PieceIconData pieceIconData in __instance.m_pieceIcons)
                         {
                             UnityEngine.Object.Destroy(pieceIconData.m_go);
@@ -312,13 +316,21 @@ namespace BuildExpansion
                                     templatePieceData.m_upgrade.SetActive(false);
                                     templatePieceData.m_go.SetActive(false);
                                 }
-                                BuildExpansion.buildFilterLogger.LogDebug($"\nPiece name: {templatePieceData.m_tooltip.m_text}" +
+                                BuildExpansionMod.buildFilterLogger.LogDebug($"\nPiece name: {templatePieceData.m_tooltip.m_text}" +
                                     $"\nPiece icon: {templatePieceData.m_icon.enabled}" +
                                     $"\nPiece index: {index}" +
                                     $"\nPiece x: {xaxis}" +
                                     $"\nPiece y: {yaxis}");
                                 __instance.m_pieceIcons.Add(templatePieceData);
                             }
+                        }
+                    }
+                    for (int yaxis = 0; yaxis < calculatedRows; yaxis++)
+                    {
+                        for (int xaxis = 0; xaxis < columns; xaxis++)
+                        {
+                            int index = yaxis * columns + xaxis;
+                            __instance.m_pieceIcons[index].m_marker.SetActive(new Vector2Int(xaxis, yaxis) == selectedNr);
                         }
                     }
                     __instance.UpdatePieceBuildStatus(buildPieces, player);
@@ -345,13 +357,13 @@ namespace BuildExpansion
     public static class PieceTablePatches
     {
         [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.PrevCategory))]
-        public static class PieceTable_PrevCategory
+        public static class PieceTable_PrevCategory_Patch
         {
             public static bool Prefix(ref PieceTable __instance)
             {
-                if (BuildExpansion.isEnabled.Value)
+                if (BuildExpansionMod.isEnabled.Value)
                 {
-                    if (BuildExpansion.disableScrollCategories.Value)
+                    if (BuildExpansionMod.disableScrollCategories.Value)
                     {
                         if (Input.GetAxis("Mouse ScrollWheel") != 0f)
                         {
@@ -364,19 +376,115 @@ namespace BuildExpansion
         }
 
         [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.NextCategory))]
-        public static class PieceTable_NextCategory
+        public static class PieceTable_NextCategory_Patch
         {
             public static bool Prefix(ref PieceTable __instance)
             {
-                if (BuildExpansion.isEnabled.Value)
+                if (BuildExpansionMod.isEnabled.Value)
                 {
-                    if (BuildExpansion.disableScrollCategories.Value)
+                    if (BuildExpansionMod.disableScrollCategories.Value)
                     {
                         if (Input.GetAxis("Mouse ScrollWheel") != 0f)
                         {
                             return false;
                         }
                     }
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.RightPiece))]
+        public static class PieceTable_RightPiece_Patch
+        {
+            public static bool Prefix(ref PieceTable __instance)
+            {
+                if (BuildExpansionMod.isEnabled.Value)
+                {
+                    if (__instance.m_availablePieces[(int)__instance.m_selectedCategory].Count <= 1)
+                    {
+                        return false;
+                    }
+                    Vector2Int vector2Int = __instance.m_selectedPiece[(int)__instance.m_selectedCategory];
+                    vector2Int.x = vector2Int.x + 1;
+                    if (vector2Int.x >= BuildExpansionMod.newGridWidth.Value)
+                    {
+                        vector2Int.x = 0;
+                    }
+                    __instance.m_selectedPiece[(int)__instance.m_selectedCategory] = vector2Int;
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.LeftPiece))]
+        public static class PieceTable_LeftPiece_Patch
+        {
+            public static bool Prefix(ref PieceTable __instance)
+            {
+                if (BuildExpansionMod.isEnabled.Value)
+                {
+                    if (__instance.m_availablePieces[(int)__instance.m_selectedCategory].Count <= 1)
+                    {
+                        return false;
+                    }
+                    Vector2Int vector2Int = __instance.m_selectedPiece[(int)__instance.m_selectedCategory];
+                    vector2Int.x = vector2Int.x - 1;
+                    if (vector2Int.x < 0)
+                    {
+                        vector2Int.x = BuildExpansionMod.newGridWidth.Value - 1;
+                    }
+                    __instance.m_selectedPiece[(int)__instance.m_selectedCategory] = vector2Int;
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpPiece))]
+        public static class PieceTable_UpPiece_Patch
+        {
+            public static bool Prefix(ref PieceTable __instance)
+            {
+                if (BuildExpansionMod.isEnabled.Value)
+                {
+                    if (__instance.m_availablePieces[(int)__instance.m_selectedCategory].Count <= 1)
+                    {
+                        return false;
+                    }
+                    Vector2Int vector2Int = __instance.m_selectedPiece[(int)__instance.m_selectedCategory];
+                    vector2Int.y = vector2Int.y - 1;
+                    if (vector2Int.y < 0)
+                    {
+                        vector2Int.y = HudPatches.calculatedRows - 1;
+                    }
+                    __instance.m_selectedPiece[(int)__instance.m_selectedCategory] = vector2Int;
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.DownPiece))]
+        public static class PieceTable_DownPiece_Patch
+        {
+            public static bool Prefix(ref PieceTable __instance)
+            {
+                if (BuildExpansionMod.isEnabled.Value)
+                {
+                    if (__instance.m_availablePieces[(int)__instance.m_selectedCategory].Count <= 1)
+                    {
+                        return false;
+                    }
+                    Vector2Int vector2Int = __instance.m_selectedPiece[(int)__instance.m_selectedCategory];
+                    vector2Int.y = vector2Int.y + 1;
+                    if (vector2Int.y >= HudPatches.calculatedRows)
+                    {
+                        vector2Int.y = 0;
+                    }
+                    __instance.m_selectedPiece[(int)__instance.m_selectedCategory] = vector2Int;
+                    return false;
                 }
                 return true;
             }
