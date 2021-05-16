@@ -14,7 +14,7 @@ namespace BuildExpansion
     public class BuildExpansionMod : BaseUnityPlugin
     {
         public const string ID = "mixone.valheimplus.buildexpansion";
-        public const string version = "1.0.6.3";
+        public const string version = "1.0.6.4";
 
         public static ConfigEntry<int> maxGridHeight;
         public static ConfigEntry<int> newGridWidth;
@@ -412,6 +412,7 @@ namespace BuildExpansion
                         vector2Int.x = 0;
                     }
                     __instance.m_selectedPiece[(int)__instance.m_selectedCategory] = vector2Int;
+                    HudPatches.visibilityInsurance.CenterOnItem(Hud.instance.m_pieceIcons[vector2Int.x + vector2Int.y * BuildExpansionMod.newGridWidth.Value].m_go.transform as RectTransform);
                     return false;
                 }
                 return true;
@@ -436,6 +437,7 @@ namespace BuildExpansion
                         vector2Int.x = BuildExpansionMod.newGridWidth.Value - 1;
                     }
                     __instance.m_selectedPiece[(int)__instance.m_selectedCategory] = vector2Int;
+                    HudPatches.visibilityInsurance.CenterOnItem(Hud.instance.m_pieceIcons[vector2Int.x + vector2Int.y * BuildExpansionMod.newGridWidth.Value].m_go.transform as RectTransform);
                     return false;
                 }
                 return true;
@@ -460,6 +462,7 @@ namespace BuildExpansion
                         vector2Int.y = HudPatches.calculatedRows - 1;
                     }
                     __instance.m_selectedPiece[(int)__instance.m_selectedCategory] = vector2Int;
+                    HudPatches.visibilityInsurance.CenterOnItem(Hud.instance.m_pieceIcons[vector2Int.x + vector2Int.y * BuildExpansionMod.newGridWidth.Value].m_go.transform as RectTransform);
                     return false;
                 }
                 return true;
@@ -484,6 +487,7 @@ namespace BuildExpansion
                         vector2Int.y = 0;
                     }
                     __instance.m_selectedPiece[(int)__instance.m_selectedCategory] = vector2Int;
+                    HudPatches.visibilityInsurance.CenterOnItem(Hud.instance.m_pieceIcons[vector2Int.x + vector2Int.y * BuildExpansionMod.newGridWidth.Value].m_go.transform as RectTransform);
                     return false;
                 }
                 return true;
