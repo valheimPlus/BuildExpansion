@@ -14,7 +14,7 @@ namespace BuildExpansion
     public class BuildExpansionMod : BaseUnityPlugin
     {
         public const string ID = "mixone.valheimplus.buildexpansion";
-        public const string version = "1.0.6.5";
+        public const string version = "1.0.6.6";
 
         public static ConfigEntry<int> maxGridHeight;
         public static ConfigEntry<int> newGridWidth;
@@ -213,6 +213,7 @@ namespace BuildExpansion
         public static Scrollbar myScroll;
         public static int calculatedRows = 1;
         public static ScrollRectEnsureVisible visibilityInsurance;
+        public static bool needRefresh = true;
 
         [HarmonyPatch(typeof(Hud), "Awake")]
         public static class Hud_Awake_Patch
@@ -262,7 +263,7 @@ namespace BuildExpansion
                         calculatedRows = 1;
                         columns = 1;
                     }
-                    if (__instance.m_pieceIcons.Count(x => x.m_go.activeSelf) != buildPieces.Count)
+                    if (needRefresh || __instance.m_pieceIcons.Count(x => x.m_go.activeSelf) != buildPieces.Count)
                     {
                         BuildExpansionMod.buildFilterLogger.LogDebug($"\npieceIcons: {__instance.m_pieceIcons.Count(x => x.m_go.activeSelf)}\nBuild pieces: {buildPieces.Count}");
                         BuildExpansionMod.buildFilterLogger.LogDebug($"\nRows: {calculatedRows}\nColumns: {columns}");
@@ -324,6 +325,8 @@ namespace BuildExpansion
                                 __instance.m_pieceIcons.Add(templatePieceData);
                             }
                         }
+                        if (needRefresh)
+                            needRefresh = false;
                     }
                     for (int yaxis = 0; yaxis < calculatedRows; yaxis++)
                     {
@@ -370,6 +373,7 @@ namespace BuildExpansion
                             return false;
                         }
                     }
+                    HudPatches.needRefresh = true;
                 }
                 return true;
             }
@@ -389,6 +393,7 @@ namespace BuildExpansion
                             return false;
                         }
                     }
+                    HudPatches.needRefresh = true;
                 }
                 return true;
             }
@@ -405,7 +410,7 @@ namespace BuildExpansion
                     {
                         return false;
                     }
-                    int lastRowElems = Hud.instance.m_pieceIcons.Count(x => x.m_go.activeSelf) % HudPatches.calculatedRows;
+                    int lastRowElems = Player.m_localPlayer.GetBuildPieces().Count % HudPatches.calculatedRows;
                     Vector2Int vector2Int = __instance.m_selectedPiece[(int)__instance.m_selectedCategory];
                     vector2Int.x = vector2Int.x + 1;
                     if ((lastRowElems != 0 && vector2Int.x > lastRowElems - 1) || vector2Int.x >= BuildExpansionMod.newGridWidth.Value)
@@ -431,7 +436,7 @@ namespace BuildExpansion
                     {
                         return false;
                     }
-                    int lastRowElems = Hud.instance.m_pieceIcons.Count(x => x.m_go.activeSelf) % HudPatches.calculatedRows;
+                    int lastRowElems = Player.m_localPlayer.GetBuildPieces().Count % HudPatches.calculatedRows;
                     Vector2Int vector2Int = __instance.m_selectedPiece[(int)__instance.m_selectedCategory];
                     vector2Int.x = vector2Int.x - 1;
                     if (vector2Int.x < 0)
@@ -463,7 +468,7 @@ namespace BuildExpansion
                     {
                         return false;
                     }
-                    int lastRowElems = Hud.instance.m_pieceIcons.Count(x => x.m_go.activeSelf) % HudPatches.calculatedRows;
+                    int lastRowElems = Player.m_localPlayer.GetBuildPieces().Count % HudPatches.calculatedRows;
                     Vector2Int vector2Int = __instance.m_selectedPiece[(int)__instance.m_selectedCategory];
                     vector2Int.y = vector2Int.y - 1;
                     if (vector2Int.y < 0)
@@ -493,7 +498,7 @@ namespace BuildExpansion
                     {
                         return false;
                     }
-                    int lastRowElems = Hud.instance.m_pieceIcons.Count(x => x.m_go.activeSelf) % HudPatches.calculatedRows;
+                    int lastRowElems = Player.m_localPlayer.GetBuildPieces().Count % HudPatches.calculatedRows;
                     Vector2Int vector2Int = __instance.m_selectedPiece[(int)__instance.m_selectedCategory];
                     vector2Int.y = vector2Int.y + 1;
                     if (vector2Int.y >= HudPatches.calculatedRows)
