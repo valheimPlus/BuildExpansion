@@ -464,7 +464,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="BuildExpansion.cs" />
+    <Compile Include="PreventClickDragScrollRect.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="ScrollRectEnsureVisible.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

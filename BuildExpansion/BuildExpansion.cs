@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection.Emit;
 using BepInEx;
 using BepInEx.Configuration;
@@ -7,7 +8,7 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace VPlusBuildExpansion
+namespace BuildExpansion
 {
     [BepInPlugin(ID, "Valheim Plus Build Expansion", version)]
     public class BuildExpansion : BaseUnityPlugin
@@ -44,7 +45,117 @@ namespace VPlusBuildExpansion
 
     #region Transpilers
 
-    #region PieceCategory
+    #region PieceTable
+
+    public static class PieceTableTranspilers
+    {
+        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.DownPiece))]
+        public static class PieceTable_DownPiece_Transpiler
+        {
+            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                if (BuildExpansion.isEnabled.Value)
+                {
+                    var codes = new List<CodeInstruction>(instructions);
+                    for(int i = 0; i < codes.Count; i++)
+                    {
+                        if(codes[i].opcode == OpCodes.Ldc_I4_5)
+                        {
+                            codes[i].opcode = OpCodes.Ldc_I4_S;
+                            codes[i].operand = HudPatches.calculatedRows;
+                        }
+                    }
+                    return codes;
+                }
+                return instructions;
+            }
+        }
+
+        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpPiece))]
+        public static class PieceTable_UpPiece_Transpiler
+        {
+            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                if (BuildExpansion.isEnabled.Value)
+                {
+                    var codes = new List<CodeInstruction>(instructions);
+                    for (int i = 0; i < codes.Count; i++)
+                    {
+                        if (codes[i].opcode == OpCodes.Ldc_I4_4)
+                        {
+                            codes[i].opcode = OpCodes.Ldc_I4_S;
+                            codes[i].operand = HudPatches.calculatedRows - 1;
+                        }
+                    }
+                    return codes;
+                }
+                return instructions;
+            }
+        }
+
+        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.RightPiece))]
+        public static class PieceTable_RightPiece_Transpiler
+        {
+            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                if (BuildExpansion.isEnabled.Value)
+                {
+                    var codes = new List<CodeInstruction>(instructions);
+                    for (int i = 0; i < codes.Count; i++)
+                    {
+                        if (codes[i].opcode == OpCodes.Ldc_I4_S)
+                        {
+                            codes[i].operand = BuildExpansion.newGridWidth.Value;
+                        }
+                    }
+                    return codes;
+                }
+                return instructions;
+            }
+        }
+
+        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.LeftPiece))]
+        public static class PieceTable_LeftPiece_Transpiler
+        {
+            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                if (BuildExpansion.isEnabled.Value)
+                {
+                    var codes = new List<CodeInstruction>(instructions);
+                    for (int i = 0; i < codes.Count; i++)
+                    {
+                        if (codes[i].opcode == OpCodes.Ldc_I4_S)
+                        {
+                            codes[i].operand = BuildExpansion.newGridWidth.Value - 1;
+                        }
+                    }
+                    return codes;
+                }
+                return instructions;
+            }
+        }
+
+        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetPiece), new Type[] { typeof(int), typeof(Vector2Int) })]
+        public static class PieceTable_GetPiece_Transpiler
+        {
+            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
+            {
+                if (BuildExpansion.isEnabled.Value)
+                {
+                    var codes = new List<CodeInstruction>(instructions);
+                    for (int i = 0; i < codes.Count; i++)
+                    {
+                        if (codes[i].opcode == OpCodes.Ldc_I4_S)
+                        {
+                            codes[i].operand = BuildExpansion.newGridWidth.Value;
+                        }
+                    }
+                    return codes;
+                }
+                return instructions;
+            }
+        }
+    }
 
     #endregion
 
@@ -78,7 +189,7 @@ namespace VPlusBuildExpansion
                     var codes = new List<CodeInstruction>(instructions);
                     codes[3].operand = BuildExpansion.newGridWidth.Value;
                     codes[5].opcode = OpCodes.Ldc_I4_S;
-                    codes[5].operand = BuildExpansion.maxGridHeight.Value;
+                    codes[5].operand = HudPatches.calculatedRows;
                     return codes;
                 }
                 return instructions;
@@ -97,6 +208,7 @@ namespace VPlusBuildExpansion
     {
         public static Scrollbar myScroll;
         public static int calculatedRows = 1;
+        public static ScrollRectEnsureVisible visibilityInsurance;
 
         [HarmonyPatch(typeof(Hud), "Awake")]
         public static class Hud_Awake_Patch
@@ -116,7 +228,7 @@ namespace VPlusBuildExpansion
                     myScroll.direction = Scrollbar.Direction.BottomToTop;
                     myScroll.gameObject.GetComponent<Image>().color = new Color32(0, 0, 0, 150);
                     myScroll.gameObject.transform.SetParent(__instance.m_pieceListRoot.transform.parent, false);
-                    ScrollRect testScroll = __instance.m_pieceListRoot.transform.parent.gameObject.AddComponent<ScrollRect>();
+                    PreventClickDragScrollRect testScroll = __instance.m_pieceListRoot.transform.parent.gameObject.AddComponent<PreventClickDragScrollRect>();
                     testScroll.content = __instance.m_pieceListRoot;
                     testScroll.viewport = __instance.m_pieceListRoot.transform.parent.gameObject.GetComponent<RectTransform>();
                     testScroll.verticalScrollbar = myScroll;
@@ -124,6 +236,7 @@ namespace VPlusBuildExpansion
                     testScroll.inertia = false;
                     testScroll.scrollSensitivity = __instance.m_pieceIconSpacing;
                     testScroll.verticalScrollbarVisibility = ScrollRect.ScrollbarVisibility.AutoHide;
+                    visibilityInsurance = testScroll.gameObject.AddComponent<ScrollRectEnsureVisible>();
                     __instance.m_pieceListRoot.sizeDelta = new Vector2((int)(__instance.m_pieceIconSpacing * BuildExpansion.newGridWidth.Value), (int)(__instance.m_pieceIconSpacing * BuildExpansion.maxGridHeight.Value) + 16);
                 }
             }
@@ -140,14 +253,16 @@ namespace VPlusBuildExpansion
                     List<Piece> buildPieces = player.GetBuildPieces();                    
                     int columns = BuildExpansion.newGridWidth.Value;
                     calculatedRows = (buildPieces.Count / columns) + 1;
-                    __instance.m_pieceListRoot.sizeDelta = new Vector2((int)(__instance.m_pieceIconSpacing * BuildExpansion.newGridWidth.Value), (int)(__instance.m_pieceIconSpacing * calculatedRows) + 16);
                     if (buildPieces.Count <= 1)
                     {
                         calculatedRows = 1;
                         columns = 1;
                     }
-                    if (__instance.m_pieceIcons.Count != calculatedRows * columns)
+                    if (__instance.m_pieceIcons.Count(x => x.m_go.activeSelf) != buildPieces.Count)
                     {
+                        BuildExpansion.buildFilterLogger.LogDebug($"\npieceIcons: {__instance.m_pieceIcons.Count(x => x.m_go.activeSelf)}\nBuild pieces: {buildPieces.Count}");
+                        BuildExpansion.buildFilterLogger.LogDebug($"\nRows: {calculatedRows}\nColumns: {columns}");
+                        __instance.m_pieceListRoot.sizeDelta = new Vector2((int)(__instance.m_pieceIconSpacing * BuildExpansion.newGridWidth.Value), (int)(__instance.m_pieceIconSpacing * calculatedRows) + 16);
                         foreach (Hud.PieceIconData pieceIconData in __instance.m_pieceIcons)
                         {
                             UnityEngine.Object.Destroy(pieceIconData.m_go);
@@ -157,54 +272,52 @@ namespace VPlusBuildExpansion
                         {
                             for (int xaxis = 0; xaxis < columns; xaxis++)
                             {
-                                GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(__instance.m_pieceIconPrefab, __instance.m_pieceListRoot);
-                                (gameObject.transform as RectTransform).anchorMin = new Vector2(0, 1);
-                                (gameObject.transform as RectTransform).anchorMax = new Vector2(0, 1);
-                                (gameObject.transform as RectTransform).pivot = new Vector2(0, 1);
-                                (gameObject.transform as RectTransform).anchoredPosition = Vector2.zero;
-                                (gameObject.transform as RectTransform).localPosition = new Vector2(xaxis * __instance.m_pieceIconSpacing, -16 + (-yaxis) * __instance.m_pieceIconSpacing);
-                                Hud.PieceIconData templatePieceData = new Hud.PieceIconData();
-                                templatePieceData.m_go = gameObject;
-                                templatePieceData.m_tooltip = gameObject.GetComponent<UITooltip>();
-                                templatePieceData.m_icon = gameObject.transform.Find("icon").GetComponent<Image>();
-                                templatePieceData.m_marker = gameObject.transform.Find("selected").gameObject;
-                                templatePieceData.m_upgrade = gameObject.transform.Find("upgrade").gameObject;
-                                templatePieceData.m_icon.color = new Color(1f, 0f, 1f, 0f);
-                                UIInputHandler templateHandler = gameObject.GetComponent<UIInputHandler>();
-                                templateHandler.m_onLeftDown = (Action<UIInputHandler>)Delegate.Combine(
-                                    templateHandler.m_onLeftDown, new Action<UIInputHandler>(__instance.OnLeftClickPiece));
-                                templateHandler.m_onRightDown = (Action<UIInputHandler>)Delegate.Combine(
-                                    templateHandler.m_onRightDown, new Action<UIInputHandler>(__instance.OnRightClickPiece));
-                                templateHandler.m_onPointerEnter = (Action<UIInputHandler>)Delegate.Combine(
-                                    templateHandler.m_onPointerEnter, new Action<UIInputHandler>(__instance.OnHoverPiece));
-                                templateHandler.m_onPointerExit = (Action<UIInputHandler>)Delegate.Combine(
-                                    templateHandler.m_onPointerExit, new Action<UIInputHandler>(__instance.OnHoverPieceExit));
+                                int index = yaxis * columns + xaxis;
+                                
+                                    GameObject gameObject = UnityEngine.Object.Instantiate<GameObject>(__instance.m_pieceIconPrefab, __instance.m_pieceListRoot);
+                                    (gameObject.transform as RectTransform).anchorMin = new Vector2(0, 1);
+                                    (gameObject.transform as RectTransform).anchorMax = new Vector2(0, 1);
+                                    (gameObject.transform as RectTransform).pivot = new Vector2(0, 1);
+                                    (gameObject.transform as RectTransform).anchoredPosition = Vector2.zero;
+                                    (gameObject.transform as RectTransform).localPosition = new Vector2(xaxis * __instance.m_pieceIconSpacing, -16 + (-yaxis) * __instance.m_pieceIconSpacing);
+                                    Hud.PieceIconData templatePieceData = new Hud.PieceIconData();
+                                    templatePieceData.m_go = gameObject;
+                                    templatePieceData.m_tooltip = gameObject.GetComponent<UITooltip>();
+                                    templatePieceData.m_icon = gameObject.transform.Find("icon").GetComponent<Image>();
+                                    templatePieceData.m_marker = gameObject.transform.Find("selected").gameObject;
+                                    templatePieceData.m_upgrade = gameObject.transform.Find("upgrade").gameObject;
+                                    templatePieceData.m_icon.color = new Color(1f, 0f, 1f, 0f);
+                                    UIInputHandler templateHandler = gameObject.GetComponent<UIInputHandler>();
+                                    templateHandler.m_onLeftDown = (Action<UIInputHandler>)Delegate.Combine(
+                                        templateHandler.m_onLeftDown, new Action<UIInputHandler>(__instance.OnLeftClickPiece));
+                                    templateHandler.m_onRightDown = (Action<UIInputHandler>)Delegate.Combine(
+                                        templateHandler.m_onRightDown, new Action<UIInputHandler>(__instance.OnRightClickPiece));
+                                    templateHandler.m_onPointerEnter = (Action<UIInputHandler>)Delegate.Combine(
+                                        templateHandler.m_onPointerEnter, new Action<UIInputHandler>(__instance.OnHoverPiece));
+                                    templateHandler.m_onPointerExit = (Action<UIInputHandler>)Delegate.Combine(
+                                        templateHandler.m_onPointerExit, new Action<UIInputHandler>(__instance.OnHoverPieceExit));                                    
+                                    templatePieceData.m_marker.SetActive(new Vector2Int(xaxis, yaxis) == selectedNr);
+                                if (index < buildPieces.Count)
+                                {
+                                    Piece piece = buildPieces[index];
+                                    templatePieceData.m_icon.sprite = piece.m_icon;
+                                    templatePieceData.m_icon.enabled = true;
+                                    templatePieceData.m_tooltip.m_text = piece.m_name;
+                                    templatePieceData.m_upgrade.SetActive(piece.m_isUpgrade);
+                                    templatePieceData.m_go.SetActive(true);
+                                } else
+                                {
+                                    templatePieceData.m_icon.enabled = false;
+                                    templatePieceData.m_tooltip.m_text = "";
+                                    templatePieceData.m_upgrade.SetActive(false);
+                                    templatePieceData.m_go.SetActive(false);
+                                }
+                                BuildExpansion.buildFilterLogger.LogDebug($"\nPiece name: {templatePieceData.m_tooltip.m_text}" +
+                                    $"\nPiece icon: {templatePieceData.m_icon.enabled}" +
+                                    $"\nPiece index: {index}" +
+                                    $"\nPiece x: {xaxis}" +
+                                    $"\nPiece y: {yaxis}");
                                 __instance.m_pieceIcons.Add(templatePieceData);
-                            }
-                        }
-                    }
-                    for (int yaxis = 0; yaxis < columns; yaxis++)
-                    {
-                        for (int xaxis = 0; xaxis < calculatedRows; xaxis++)
-                        {
-                            int index = yaxis * calculatedRows + xaxis;
-                            Hud.PieceIconData templatePieceData = __instance.m_pieceIcons[index];
-                            templatePieceData.m_marker.SetActive(new Vector2Int(xaxis, yaxis) == selectedNr);
-                            if (index < buildPieces.Count)
-                            {
-                                Piece piece = buildPieces[index];
-                                templatePieceData.m_icon.sprite = piece.m_icon;
-                                templatePieceData.m_icon.enabled = true;
-                                templatePieceData.m_tooltip.m_text = piece.m_name;
-                                templatePieceData.m_upgrade.SetActive(piece.m_isUpgrade);
-                                templatePieceData.m_go.SetActive(true);
-                            }
-                            else
-                            {
-                                templatePieceData.m_icon.enabled = false;
-                                templatePieceData.m_tooltip.m_text = "";
-                                templatePieceData.m_upgrade.SetActive(false);
-                                templatePieceData.m_go.SetActive(false);
                             }
                         }
                     }
@@ -245,7 +358,6 @@ namespace VPlusBuildExpansion
                             return false;
                         }
                     }
-                    HudPatches.myScroll.value = 0;
                 }
                 return true;
             }
@@ -265,7 +377,6 @@ namespace VPlusBuildExpansion
                             return false;
                         }
                     }
-                    HudPatches.myScroll.value = 0;
                 }
                 return true;
             }
