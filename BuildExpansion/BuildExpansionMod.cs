@@ -14,7 +14,7 @@ namespace BuildExpansion
     public class BuildExpansionMod : BaseUnityPlugin
     {
         public const string ID = "mixone.valheimplus.buildexpansion";
-        public const string version = "1.0.6.7";
+        public const string version = "1.0.6.8";
 
         public static ConfigEntry<int> maxGridHeight;
         public static ConfigEntry<int> newGridWidth;
@@ -413,7 +413,7 @@ namespace BuildExpansion
                     int lastRowElems = Player.m_localPlayer.GetBuildPieces().Count % BuildExpansionMod.newGridWidth.Value;
                     Vector2Int vector2Int = __instance.m_selectedPiece[(int)__instance.m_selectedCategory];
                     vector2Int.x = vector2Int.x + 1;
-                    if ((lastRowElems != 0 && vector2Int.x > lastRowElems - 1) || vector2Int.x >= BuildExpansionMod.newGridWidth.Value)
+                    if ((vector2Int.y >= HudPatches.calculatedRows && lastRowElems != 0 && vector2Int.x > lastRowElems - 1) || vector2Int.x >= BuildExpansionMod.newGridWidth.Value)
                     {
                         vector2Int.x = 0;
                     }
@@ -441,7 +441,7 @@ namespace BuildExpansion
                     vector2Int.x = vector2Int.x - 1;
                     if (vector2Int.x < 0)
                     {                        
-                        if (lastRowElems != 0 && vector2Int.x > lastRowElems - 1)
+                        if (vector2Int.y >= HudPatches.calculatedRows - 1 && lastRowElems != 0 && vector2Int.x > lastRowElems - 1)
                         {
                             vector2Int.x = lastRowElems - 1;
                         } else
@@ -505,7 +505,7 @@ namespace BuildExpansion
                     {
                         vector2Int.y = 0;
                     }
-                    if(lastRowElems != 0 && vector2Int.x > lastRowElems - 1)
+                    if(vector2Int.y >= HudPatches.calculatedRows - 1 && lastRowElems != 0 && vector2Int.x > lastRowElems - 1)
                     {
                         vector2Int.x = lastRowElems - 1;
                     }
