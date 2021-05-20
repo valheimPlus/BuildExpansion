@@ -14,13 +14,12 @@ namespace BuildExpansion
     public class BuildExpansionMod : BaseUnityPlugin
     {
         public const string ID = "mixone.valheimplus.buildexpansion";
-        public const string version = "1.0.6.8";
+        public const string version = "1.0.8";
 
         public static ConfigEntry<int> maxGridHeight;
         public static ConfigEntry<int> newGridWidth;
         public static ConfigEntry<bool> disableScrollCategories;
         public static ConfigEntry<bool> isEnabled;
-        //public static ConfigEntry<bool> autoExpand;        
 
         public Harmony harmony;
         
@@ -28,11 +27,10 @@ namespace BuildExpansion
 
         public void Awake()
         {
-            maxGridHeight = Config.Bind("General.Constants", "MaxGridHeight", 15, "Sets a maximum value for grid height, if over 30 can impact performance.");
+            maxGridHeight = Config.Bind("General.Constants", "MaxGridHeight", 15, "Sets a maximum value for grid height, if over 50 can impact performance.");
             newGridWidth = Config.Bind("General", "GridWidth", 10, "Width in number of columns of the build grid, maximum value of 10.");
             disableScrollCategories = Config.Bind("General.Toggles", "DisableScrollCategories", true, "Should the mousewheel stop scrolling categories, RECOMMEND TRUE.");
             isEnabled = Config.Bind("General.Toggles", "EnableExpansion", true, "Whether or not to expand the build grid.");
-            //autoExpand = Config.Bind("General.Toggles", "AutoExpand", true, "Alpha feature to auto expand based on number of pieces.");
             if (newGridWidth.Value > 10)
                 newGridWidth.Value = 10;
             harmony = new Harmony(ID);
@@ -44,123 +42,6 @@ namespace BuildExpansion
     }
 
     #region Transpilers
-
-    #region PieceTable
-    /*
-    public static class PieceTableTranspilers
-    {
-        public static int calculatedRows = 1;
-
-        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.DownPiece))]
-        public static class PieceTable_DownPiece_Transpiler
-        {
-            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                if (BuildExpansionMod.isEnabled.Value)
-                {
-                    var codes = new List<CodeInstruction>(instructions);
-                    for(int i = 0; i < codes.Count; i++)
-                    {
-                        if(codes[i].opcode == OpCodes.Ldc_I4_5)
-                        {
-                            codes[i].opcode = OpCodes.Ldc_I4_S;
-                            codes[i].operand = calculatedRows;
-                        }
-                    }
-                    return codes;
-                }
-                return instructions;
-            }
-        }
-
-        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.UpPiece))]
-        public static class PieceTable_UpPiece_Transpiler
-        {
-            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                if (BuildExpansionMod.isEnabled.Value)
-                {
-                    var codes = new List<CodeInstruction>(instructions);
-                    for (int i = 0; i < codes.Count; i++)
-                    {
-                        if (codes[i].opcode == OpCodes.Ldc_I4_4)
-                        {
-                            codes[i].opcode = OpCodes.Ldc_I4_S;
-                            codes[i].operand = calculatedRows - 1;
-                        }
-                    }
-                    return codes;
-                }
-                return instructions;
-            }
-        }
-
-        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.RightPiece))]
-        public static class PieceTable_RightPiece_Transpiler
-        {
-            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                if (BuildExpansionMod.isEnabled.Value)
-                {
-                    var codes = new List<CodeInstruction>(instructions);
-                    for (int i = 0; i < codes.Count; i++)
-                    {
-                        if (codes[i].opcode == OpCodes.Ldc_I4_S)
-                        {
-                            codes[i].operand = BuildExpansionMod.newGridWidth.Value;
-                        }
-                    }
-                    return codes;
-                }
-                return instructions;
-            }
-        }
-
-        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.LeftPiece))]
-        public static class PieceTable_LeftPiece_Transpiler
-        {
-            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                if (BuildExpansionMod.isEnabled.Value)
-                {
-                    var codes = new List<CodeInstruction>(instructions);
-                    for (int i = 0; i < codes.Count; i++)
-                    {
-                        if (codes[i].opcode == OpCodes.Ldc_I4_S)
-                        {
-                            codes[i].operand = BuildExpansionMod.newGridWidth.Value - 1;
-                        }
-                    }
-                    return codes;
-                }
-                return instructions;
-            }
-        }
-
-        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.GetPiece), new Type[] { typeof(int), typeof(Vector2Int) })]
-        public static class PieceTable_GetPiece_Transpiler
-        {
-            public static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions)
-            {
-                if (BuildExpansionMod.isEnabled.Value)
-                {
-                    var codes = new List<CodeInstruction>(instructions);
-                    for (int i = 0; i < codes.Count; i++)
-                    {
-                        if (codes[i].opcode == OpCodes.Ldc_I4_S)
-                        {
-                            codes[i].operand = BuildExpansionMod.newGridWidth.Value;
-                        }
-                    }
-                    return codes;
-                }
-                return instructions;
-            }
-        }    
-    }
-    */
-
-    #endregion
 
     #region Hud
 
@@ -263,6 +144,7 @@ namespace BuildExpansion
                         calculatedRows = 1;
                         columns = 1;
                     }
+                    category = (Piece.PieceCategory)5;
                     if (needRefresh || __instance.m_pieceIcons.Count(x => x.m_go.activeSelf) != buildPieces.Count)
                     {
                         BuildExpansionMod.buildFilterLogger.LogDebug($"\npieceIcons: {__instance.m_pieceIcons.Count(x => x.m_go.activeSelf)}\nBuild pieces: {buildPieces.Count}");
@@ -359,6 +241,18 @@ namespace BuildExpansion
     #region PieceTable
     public static class PieceTablePatches
     {
+        [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.SetCategory))]
+        public static class PieceTable_SetCategory_Patch
+        {
+            public static void Postfix(ref PieceTable __instance)
+            {
+                if (BuildExpansionMod.isEnabled.Value)
+                {
+                    HudPatches.needRefresh = true;
+                }
+            }
+        }
+
         [HarmonyPatch(typeof(PieceTable), nameof(PieceTable.PrevCategory))]
         public static class PieceTable_PrevCategory_Patch
         {
