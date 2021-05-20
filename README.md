@@ -1,6 +1,8 @@
 # Build Expansion
 
-### Latest update ensures compatability with custom hammers and other PieceTables
+Controller usage now should work fine, please remember I am a coder and not a console user, I do not have a controller to test, nor do I want to get one.
+
+### 1.0.5 update ensures compatability with custom hammers and other PieceTables
 
 Expands Hammer build table to desired height and width and adds a scrollbar.
 
