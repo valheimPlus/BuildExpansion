@@ -20,6 +20,7 @@ namespace BuildExpansion
         public static ConfigEntry<int> newGridWidth;
         public static ConfigEntry<bool> disableScrollCategories;
         public static ConfigEntry<bool> isEnabled;
+        public static ConfigEntry<bool> debugLogging;
 
         public Harmony harmony;
         
@@ -31,6 +32,7 @@ namespace BuildExpansion
             newGridWidth = Config.Bind("General", "GridWidth", 10, "Width in number of columns of the build grid, maximum value of 10.");
             disableScrollCategories = Config.Bind("General.Toggles", "DisableScrollCategories", true, "Should the mousewheel stop scrolling categories, RECOMMEND TRUE.");
             isEnabled = Config.Bind("General.Toggles", "EnableExpansion", true, "Whether or not to expand the build grid.");
+            debugLogging = Config.Bind("General.Toggles", "DebugLogging", false, "Whether or not to print the debug logging.");
             if (newGridWidth.Value > 10)
                 newGridWidth.Value = 10;
             harmony = new Harmony(ID);
@@ -147,8 +149,11 @@ namespace BuildExpansion
                     category = (Piece.PieceCategory)5;
                     if (needRefresh || __instance.m_pieceIcons.Count(x => x.m_go.activeSelf) != buildPieces.Count)
                     {
-                        BuildExpansionMod.buildFilterLogger.LogDebug($"\npieceIcons: {__instance.m_pieceIcons.Count(x => x.m_go.activeSelf)}\nBuild pieces: {buildPieces.Count}");
-                        BuildExpansionMod.buildFilterLogger.LogDebug($"\nRows: {calculatedRows}\nColumns: {columns}");
+                        if (BuildExpansionMod.debugLogging.Value)
+                        {
+                            BuildExpansionMod.buildFilterLogger.LogDebug($"\npieceIcons: {__instance.m_pieceIcons.Count(x => x.m_go.activeSelf)}\nBuild pieces: {buildPieces.Count}");
+                            BuildExpansionMod.buildFilterLogger.LogDebug($"\nRows: {calculatedRows}\nColumns: {columns}");
+                        }
                         __instance.m_pieceListRoot.sizeDelta = new Vector2((int)(__instance.m_pieceIconSpacing * BuildExpansionMod.newGridWidth.Value), (int)(__instance.m_pieceIconSpacing * calculatedRows) + 16);
                         foreach (Hud.PieceIconData pieceIconData in __instance.m_pieceIcons)
                         {
@@ -199,11 +204,14 @@ namespace BuildExpansion
                                     templatePieceData.m_upgrade.SetActive(false);
                                     templatePieceData.m_go.SetActive(false);
                                 }
-                                BuildExpansionMod.buildFilterLogger.LogDebug($"\nPiece name: {templatePieceData.m_tooltip.m_text}" +
+                                if (BuildExpansionMod.debugLogging.Value)
+                                {
+                                    BuildExpansionMod.buildFilterLogger.LogDebug($"\nPiece name: {templatePieceData.m_tooltip.m_text}" +
                                     $"\nPiece icon: {templatePieceData.m_icon.enabled}" +
                                     $"\nPiece index: {index}" +
                                     $"\nPiece x: {xaxis}" +
                                     $"\nPiece y: {yaxis}");
+                                }
                                 __instance.m_pieceIcons.Add(templatePieceData);
                             }
                         }
