@@ -14,7 +14,7 @@ namespace BuildExpansion
     public class BuildExpansionMod : BaseUnityPlugin
     {
         public const string ID = "mixone.valheimplus.buildexpansion";
-        public const string version = "1.0.8";
+        public const string version = "1.1.0";
 
         public static ConfigEntry<int> maxGridHeight;
         public static ConfigEntry<int> newGridWidth;
@@ -28,11 +28,11 @@ namespace BuildExpansion
         public void Awake()
         {
             maxGridHeight = Config.Bind("General.Constants", "MaxGridHeight", 15, "Sets a maximum value for grid height, if over 50 can impact performance.");
-            newGridWidth = Config.Bind("General", "GridWidth", 10, "Width in number of columns of the build grid, maximum value of 10.");
+            newGridWidth = Config.Bind("General", "GridWidth", 13, "Width in number of columns of the build grid, maximum value of 13.");
             disableScrollCategories = Config.Bind("General.Toggles", "DisableScrollCategories", true, "Should the mousewheel stop scrolling categories, RECOMMEND TRUE.");
             isEnabled = Config.Bind("General.Toggles", "EnableExpansion", true, "Whether or not to expand the build grid.");
-            if (newGridWidth.Value > 10)
-                newGridWidth.Value = 10;
+            if (newGridWidth.Value > 13)
+                newGridWidth.Value = 13;
             harmony = new Harmony(ID);
             harmony.PatchAll();
             buildFilterLogger = Logger;
